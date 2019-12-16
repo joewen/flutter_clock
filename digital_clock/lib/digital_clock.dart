@@ -4,27 +4,12 @@
 
 import 'dart:async';
 
+import 'package:digital_clock/animating_char.dart';
+import 'package:digital_clock/char_change_notifier.dart';
+import 'package:digital_clock/font_model.dart';
 import 'package:flutter_clock_helper/model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-enum _Element {
-  background,
-  text,
-  shadow,
-}
-
-final _lightTheme = {
-  _Element.background: Color(0xFF81B3FE),
-  _Element.text: Colors.white,
-  _Element.shadow: Colors.black,
-};
-
-final _darkTheme = {
-  _Element.background: Colors.black,
-  _Element.text: Colors.white,
-  _Element.shadow: Color(0xFF174EA6),
-};
 
 /// A basic digital clock.
 ///
@@ -33,6 +18,7 @@ class DigitalClock extends StatefulWidget {
   const DigitalClock(this.model);
 
   final ClockModel model;
+  final double horizontalPadding = 40;
 
   @override
   _DigitalClockState createState() => _DigitalClockState();
@@ -41,13 +27,39 @@ class DigitalClock extends StatefulWidget {
 class _DigitalClockState extends State<DigitalClock> {
   DateTime _dateTime = DateTime.now();
   Timer _timer;
+  final FontModel fontModel = FontModel(20);
+
+  final List<CharChangeNotifier> notifiers = List<CharChangeNotifier>();
 
   @override
   void initState() {
     super.initState();
     widget.model.addListener(_updateModel);
+    _initializeNotifier();
     _updateTime();
     _updateModel();
+  }
+
+  void _initializeNotifier() {
+    var str = _getTimeString();
+    for (var i = 0; i < str.length; i++) {
+      notifiers.add(CharChangeNotifier(str.codeUnitAt(i)));
+    }
+  }
+
+  String _getTimeString() => DateFormat('HH:mm:ss').format(_dateTime);
+
+  void _updateNotitier() {
+    var str = _getTimeString();
+    for (var i = 0; i < str.length; i++) {
+      notifiers[i].setChar(str.codeUnitAt(i));
+    }
+  }
+
+  void _disposeNotifier() {
+    for (var i = 0; i < notifiers.length; i++) {
+      notifiers[i].dispose();
+    }
   }
 
   @override
@@ -64,6 +76,7 @@ class _DigitalClockState extends State<DigitalClock> {
     _timer?.cancel();
     widget.model.removeListener(_updateModel);
     widget.model.dispose();
+    _disposeNotifier();
     super.dispose();
   }
 
@@ -76,59 +89,45 @@ class _DigitalClockState extends State<DigitalClock> {
   void _updateTime() {
     setState(() {
       _dateTime = DateTime.now();
-      // Update once per minute. If you want to update every second, use the
-      // following code.
-      _timer = Timer(
-        Duration(minutes: 1) -
-            Duration(seconds: _dateTime.second) -
-            Duration(milliseconds: _dateTime.millisecond),
-        _updateTime,
-      );
+      _updateNotitier();
+
       // Update once per second, but make sure to do it at the beginning of each
       // new second, so that the clock is accurate.
-      // _timer = Timer(
-      //   Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
-      //   _updateTime,
-      // );
+      _timer = Timer(
+        Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
+        _updateTime,
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).brightness == Brightness.light
-        ? _lightTheme
-        : _darkTheme;
-    final hour =
-        DateFormat(widget.model.is24HourFormat ? 'HH' : 'hh').format(_dateTime);
-    final minute = DateFormat('mm').format(_dateTime);
-    final fontSize = MediaQuery.of(context).size.width / 3.5;
-    final offset = -fontSize / 7;
-    final defaultStyle = TextStyle(
-      color: colors[_Element.text],
-      fontFamily: 'PressStart2P',
-      fontSize: fontSize,
-      shadows: [
-        Shadow(
-          blurRadius: 0,
-          color: colors[_Element.shadow],
-          offset: Offset(10, 0),
-        ),
-      ],
-    );
+    var width = MediaQuery.of(context).size.width - widget.horizontalPadding;
+    var dotSize = (width / fontModel.size / notifiers.length).toDouble();
 
-    return Container(
-      color: colors[_Element.background],
-      child: Center(
-        child: DefaultTextStyle(
-          style: defaultStyle,
-          child: Stack(
-            children: <Widget>[
-              Positioned(left: offset, top: 0, child: Text(hour)),
-              Positioned(right: offset, bottom: offset, child: Text(minute)),
-            ],
-          ),
-        ),
-      ),
+    return FutureBuilder<bool>(
+      future: fontModel.initialize(),
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.hasData) {
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
+            color: Color.fromARGB(0xff, 0x00, 0x30, 0x49),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: notifiers
+                  .map((n) => Expanded(
+                          child: Container(
+                        child: AnimatingChar(fontModel, dotSize, notifier: n),
+                      )))
+                  .toList(),
+            ),
+          );
+        } else {
+          return Container(
+            color: Colors.black,
+          );
+        }
+      },
     );
   }
 }
