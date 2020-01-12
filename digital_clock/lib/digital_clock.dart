@@ -115,10 +115,13 @@ class _DigitalClockState extends State<DigitalClock> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: notifiers
-                  .map((n) => Expanded(
-                          child: Container(
+                  .map(
+                    (n) => Expanded(
+                      child: Container(
                         child: AnimatingChar(fontModel, dotSize, notifier: n),
-                      )))
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           );
