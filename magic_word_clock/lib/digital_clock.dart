@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:digital_clock/animating_char.dart';
-import 'package:digital_clock/char_change_notifier.dart';
-import 'package:digital_clock/font_model.dart';
+import 'animating_char.dart';
+import 'char_change_notifier.dart';
+import 'font_model.dart';
 import 'package:flutter_clock_helper/model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

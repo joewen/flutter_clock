@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:digital_clock/char_matrix.dart';
+import 'char_matrix.dart';
 
 class DotPath {
   DotPath(this.start, this.end);

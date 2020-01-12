@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:digital_clock/char_matrix.dart';
-import 'package:digital_clock/dot_path.dart';
+import 'char_matrix.dart';
+import 'dot_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:text_to_path_maker/text_to_path_maker.dart';

@@ -1,8 +1,8 @@
-import 'package:digital_clock/char_change_notifier.dart';
-import 'package:digital_clock/char_painter.dart';
+import 'char_change_notifier.dart';
+import 'char_painter.dart';
 import 'package:flutter/material.dart';
-import 'package:digital_clock/dot_path.dart';
-import 'package:digital_clock/font_model.dart';
+import 'dot_path.dart';
+import 'font_model.dart';
 
 class AnimatingChar extends StatefulWidget {
   final FontModel fontModel;

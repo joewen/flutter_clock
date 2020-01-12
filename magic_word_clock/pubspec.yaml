@@ -1,5 +1,5 @@
-name: digital_clock
-description: Digital clock.
+name: magic_word_clock
+description: Magic word clock.
 version: 1.0.0+1
 
 environment:
